@@ -56,13 +56,20 @@ def check(data: bytes) -> int:
             file=sys.stderr,
         )
         return 1
+    mode = target.stat().st_mode & 0o777
+    if mode != MODE:
+        print(
+            f"error: {target} has mode {oct(mode)}, expected {oct(MODE)}",
+            file=sys.stderr,
+        )
+        return 1
     print(f"verified {target}: {len(got)} bytes, sha256 {digest(got)}")
     return 0
 
 
 def publish(data: bytes) -> int:
     directory = out_dir()
-    directory.mkdir(parents=True, exist_ok=True)
+    os.makedirs(directory, exist_ok=True)
     target = directory / NAME
     target.write_bytes(data)
     os.chmod(target, MODE)
